@@ -1,0 +1,653 @@
+PARA VENTAS INTERNAS DEL SISTEMA:
+
+Primero crear venta. url/sales/
+
+FACTURA:
+
+{
+  "client_id": 1,
+  "total_exento": 0,
+  "total_gravado": 5,
+  "total_no_suj": 0,
+  "total_of_totals": 5,
+  "discount_exento": 0,
+  "discount_no_suj": 0,
+  "discount_gravado": 0,
+  "discount_total": 0,
+  "discount_total_percentage": 0,
+  "total_with_discount": 5,
+  "total_amount": 5,
+  "total_letters": "cinco dolares",
+  "iva_total": 0.57,
+  "iva_retention": 0.0,
+  "tax_retention": 0.0,
+  "operation_condition": 1, 
+  "sale_type_id": 1,
+  "sale_point_id": 1,
+  "user_id": 1,
+  "sale_details": [
+    {
+      "num_item": 1,
+      "solution_sale_id": 1,
+      "quantity": 1.0,
+      "unit_price": 5,
+      "gravado_amount": 5,
+      "exento_amount": 0.0,
+      "no_suj_amount": 0.0,
+      "discount_amount": 0.0,
+      "iva_total": 0.57
+    }
+  ],
+  "payments": [
+    {
+      "payment_method_id": 1,
+      "amount": 5
+    }
+  ]
+}
+
+CRÉDITO FISCAL:
+
+{
+  "client_id": 2,
+  "total_exento": 0,
+  "total_gravado": 4.35,
+  "total_no_suj": 0,
+  "total_of_totals": 4.35,
+  "discount_exento": 0,
+  "discount_no_suj": 0,
+  "discount_gravado": 0,
+  "discount_total": 0,
+  "discount_total_percentage": 0,
+  "total_with_discount": 4.35,
+  "total_amount": 5,
+  "total_letters": "cinco dolares",
+  "iva_total": 0.65,
+  "iva_retention": 0.0,
+  "tax_retention": 0.0,
+  "operation_condition": 1,
+  "sale_type_id": 2,
+  "sale_point_id": 1,
+  "user_id": 1,
+  "sale_details": [
+    {
+      "num_item": 1,
+      "solution_sale_id": 1,
+      "quantity": 1.0,
+      "unit_price": 4.35,
+      "gravado_amount": 4.35,
+      "exento_amount": 0.0,
+      "no_suj_amount": 0.0,
+      "discount_amount": 0.0,
+      "iva_total": 0.65
+    }
+  ],
+  "payments": [
+    {
+      "payment_method_id": 1,
+      "amount": 5
+    }
+  ]
+}
+
+Luego mandarla a hacienda url/connection/${sale.id}
+Todo se hace automático, y siempre se retorna los detalles:
+
+Este es un ejemplo de No procesada, las observaciones y descripcion dice que se debe cambiar.
+El firmador devuelve la firma o un error si es que falla.
+El dteJson es el json final que se debe almacenar.
+
+{
+    "connection": {
+        "mhConnection": {
+            "message": "Venta No procesada",
+            "descripcionMsg": "[identificacion.codigoGeneracion] YA EXISTE UN REGISTRO CON ESE VALOR",
+            "observaciones": []
+        },
+        "firmador": {
+            "firma": "eyJhb...
+        }
+    },
+    "dteJsonRes": ...
+
+}
+
+---------------------------------------------------------------------------------------------------------------------
+
+PARA INVITADOS 
+
+Para factura: url/connection-guest/fcf/
+
+La respuesta es la misma, a diferencia que no es automático y el guest debe mandar todo el cuerpo, (hasta el tokeAuth)
+Si el token falla se retorna para que se use en la siguiente consulta, en estos casos retorna esto:
+
+{
+    "connection": {
+        "mhConnection": {
+            "message": "token invalido. Probar nuevamente con el generado",
+            "authProcess": {
+                "token": "Bearer eyZs...",
+                "authProcess": {}
+            }
+        },
+        "firmador": {
+            "firma": "eysW..."
+        }
+    },
+    "dteJsonRes": ...
+}
+
+El cuerpo que se debe enviar es el siguiente:
+
+---------------------------------------------------------------------------------------------------------------------
+
+RECOMENDACIONES:
+
+Formato DTE: textoDeDTE-saleType-Sucursal/PuntodeVenta-contadorDe15Caracteres
+
+Recomendación, guardar en db 2 valores:
+1. Tipo de DTE (único): 2025/DTE-01-M001P001
+2. un contador de tipos únicos de DTE: 4
+
+---------------------------------------------------------------------------------------------------------------------
+
+FACTURA:
+
+
+{
+  "sale_id": 1,
+  "token": "Bearer eyJhbGc...",
+
+  "factu_version": 1,
+  "environment": "00", // si es producción, mandar: "01"
+  "sale_type": "01",
+  "dte_formatted": "DTE-01-M001P001-000000000000042",
+  "generationCode": "05639BAB-948F-4835-7C1D-A7D8129AA25F",
+  "dateSale": "2025-09-10",
+  "hourSale": "10:30:00",
+
+  "org_nit": "06141608191032",
+  "org_nrc": "2836740",
+  "org_name": "SIGMA TRADE LOGISTICS, S.A. DE C.V.",
+  "economyActivity_num": "51201",
+  "economyActivity_name": "Transporte de carga por vía aérea",
+  "org_comercial_name": "SIGMA",
+  "establishment_type": "01",
+  "establishment_department": "06",
+  "establishment_municipallity": "14",
+  "establishment_address": "San Salvador, El Salvador",
+  "org_phone": "+50325635276",
+  "org_email": "contacto@miempresa.com",
+  "mh_establishment": "M001",
+  "establishment": "S001",
+  "mh_sale_point": "P001",
+  "sale_point": "SIGMA-P.1",
+
+  "client_doc_type": null,
+  "client_identity_code": null,
+  "client_nrc": null,
+  "client_name": "Consumidor final",
+  "client_economic_activity_num": null,
+  "client_economic_activity_name": null,
+  "client_address": null,
+  "client_phone_number": null,
+  "client_email": "test@gmail.com",
+
+  "total_no_suj": 0,
+  "total_exento": 0,
+  "total_gravado": 5,
+  "total_of_totals": 5, // total de los totales anteriores
+  "discount_no_suj": 0,
+  "discount_exento": 0,
+  "discount_gravado": 0,
+  "discount_total_percentage": 0, // porcentaje total del descuento global
+  "discount_total": 0,
+  "total_with_discount": 5, // total_of_totals - discount_total
+  "iva_retention": 0,
+  "tax_retention": 0,
+  "total_amount": 5,
+  "total_letters": "cinco dólares",
+  "iva_total": 0.57,
+  "operation_condition": 1,
+
+  "sale_details": [
+    {
+      "num_item": 1,
+      "item_type": 1,
+      "internal_sale_code": "S001",
+      "measure_unit_code": 36,
+      "measure_unit_name": "Libra",
+      "quantity": 1,
+      "unit_price": 5,
+      "discount_amount": 0,
+      "no_suj_amount": 0,
+      "exento_amount": 0,
+      "gravado_amount": 5,
+      "iva_total": 0.57
+    }
+  ]
+}
+
+CRÉDITO FISCAL:
+
+{
+  "sale_id": 4,
+  "token": "Bearer eyJhbGci...",
+
+  "factu_version": 3,
+  "environment": "00",
+  "sale_type": "03",
+  "dte_formatted": "DTE-03-M001P001-000000000000008",
+  "generationCode": "E5C35E29-7607-4AE4-9E1E-0BAA0779D45C",
+  "dateSale": "2025-09-11",
+  "hourSale": "06:00:17",
+
+  "org_nit": "06141608191032",
+  "org_nrc": "2836740",
+  "org_name": "SIGMA TRADE LOGISTICS, S.A. DE C.V.",
+  "economyActivity_num": "51201",
+  "economyActivity_name": "Transporte de carga por vía aérea",
+  "org_comercial_name": "SIGMA",
+  "establishment_type": "01",
+  "establishment_department_code": "06",
+  "establishment_municipallity_code": "23",
+  "establishment_address": "lorem ipsum lorem ipsum",
+  "org_phone": "2563-5276",
+  "org_email": "accounting@sigmatradelogistics.com",
+  "mh_establishment": "M001",
+  "establishment": "M001",
+  "mh_sale_point": "P001",
+  "sale_point": "P001",
+
+  "client_nit": "05280701251017",
+  "client_nrc": "3542920",
+  "client_name": "CACERES SOLUTIONS, SOCIEDAD POR ACCIONES SIMPLIFICADA",
+  "client_economic_activity_num": "63990",
+  "client_economic_activity_name": "Otros servicios de información n.c.p.",
+  "client_department_code": "06",
+  "client_municipallity_code": "10",
+  "client_address_complement": "San Salvador, col. Olímpica, Senda Esmeralda #210",
+  "client_phone_number": "+50378005237",
+  "client_email": "caceres@test.com",
+
+  "total_no_suj": 0,
+  "total_exento": 0,
+  "total_gravado": 4.35,
+  "total_of_totals": 4.35,
+  "discount_no_suj": 0,
+  "discount_exento": 0,
+  "discount_gravado": 0,
+  "discount_total_percentage": 0,
+  "discount_total": 0,
+  "total_with_discount": 4.35,
+  "iva_perception": 0,
+  "iva_retention": 0,
+  "tax_retention": 0,
+  "total_amount": 5.00,
+  "total_letters": "cinco dolares",
+  "iva_total": 0.65,
+  "operation_condition": 1,
+
+  "sale_details": [
+    {
+      "num_item": 1,
+      "item_type": 2, // bien o servicio ?
+      "quantity": 1,
+      "internal_sale_code": "SS001",
+      "measure_unit_code": 36, 
+      "measure_unit_name": "Libra",
+      "unit_price": 4.35, // valor del item
+      "discount_amount": 0,
+      "no_suj_amount": 0,
+      "exento_amount": 0,
+      "gravado_amount": 4.35 // valor del item * quantity
+    }
+  ]
+}
+
+NOTAS CRÉDITO/DÉBITO
+Crédito: Restarle a la venta
+Débito: Agregarle a la venta
+
+Misma base de schema par ambas según su propósito:
+
+{
+  "sale_id": 101,
+  "token": "Bearer eyJhbGc...",
+
+  "factu_version": 3,
+  "environment": "00",
+  "sale_type": "05",
+  "dte_formatted": "DTE-05-M001P001-000000000000099",
+  "generationCode": "7E8CD5D1-43BC-4D67-B0F2-8E7E2F3210FA",
+  "dateSale": "2025-09-12",
+  "hourSale": "11:45:00",
+
+  "generation_code_related_sale": "AAC35E29-7A07-4AE4-9E1E-0BAA078AA45C",
+  "date_related_sale": "2025-09-11",
+
+  "org_nit": "06141608191032",
+  "org_nrc": "2836740",
+  "org_name": "SIGMA TRADE LOGISTICS, S.A. DE C.V.",
+  "economyActivity_num": "51201",
+  "economyActivity_name": "Transporte de carga por vía aérea",
+  "org_comercial_name": "SIGMA",
+  "establishment_type": "01",
+  "establishment_department_code": "06",
+  "establishment_municipallity_code": "14",
+  "establishment_address": "San Salvador, El Salvador",
+  "org_phone": "+50325635276",
+  "establishment_department": "San Salvador",
+  "establishment_municipallity": "San Salvador",
+  "org_email": "contacto@miempresa.com",
+  "mh_establishment": "M001",
+  "establishment": "S001",
+  "mh_sale_point": "P001",
+  "sale_point": "SIGMA-P.1",
+
+  "client_nit": "05280701251017",
+  "client_nrc": "3542920",
+  "client_name": "CACERES SOLUTIONS, SOCIEDAD POR ACCIONES SIMPLIFICADA",
+  "client_economic_activity_num": "63990",
+  "client_economic_activity_name": "Otros servicios de información n.c.p.",
+  "client_department_code": "06",
+  "client_municipallity_code": "14",
+  "client_address_complement": "Colonia Escalón, San Salvador",
+  "client_phone_number": "+50370306656",
+  "client_email": "test@gmail.com",
+
+  "total_no_suj": 0,
+  "total_exento": 0,
+  "total_gravado": 1.74,
+  "total_of_totals": 1.74,
+  "discount_no_suj": 0,
+  "discount_exento": 0,
+  "discount_gravado": 0,
+  "discount_total": 0,
+  "total_with_discount": 1.74,
+  "iva_total": 0.26,
+  "iva_perception": 0,
+  "iva_retention": 0,
+  "tax_retention": 0,
+  "total_amount": 2,
+  "total_letters": "cinco dólares",
+  "operation_condition": 1,
+
+  "sale_details": [
+    {
+      "num_item": 1,
+      "item_type": 1,
+      "quantity": 1,
+      "internal_sale_code": "S001",
+      "measure_unit_code": 36,
+      "measure_unit_name": "Libra",
+      "unit_price": 1.74,
+      "discount_amount": 0,
+      "no_suj_amount": 0,
+      "exento_amount": 0,
+      "gravado_amount": 1.74,
+      "iva_total": 0.26
+    }
+  ]
+}
+
+FACTURA DE EXPORTACIÓN:
+
+{
+  "sale_id": 1,
+  "token": "Bearer eyJhb...",
+
+  "factu_version": 1,
+  "environment": "00",
+  "sale_type": "11",
+  "dte_formatted": "DTE-11-M001P001-000000000000003",
+  "generationCode": "05639BAB-951F-4835-7C1D-A7D8127BA26F",
+  "dateSale": "2025-09-21",
+  "hourSale": "10:30:00",
+
+  "org_nit": "06141608191032",
+  "org_nrc": "2836740",
+  "org_name": "SIGMA TRADE LOGISTICS, S.A. DE C.V.",
+  "economyActivity_num": "51201",
+  "economyActivity_name": "Transporte de carga por vía aérea",
+  "org_comercial_name": "SIGMA",
+  "establishment_type": "01",
+  "establishment_department_code": "06",
+  "establishment_municipallity_code": "23",
+  "establishment_address": "Calle Principal, San Salvador",
+  "org_phone": "22223333",
+  "org_email": "info@demosoft.com",
+  "mh_establishment": "M001",
+  "establishment": "S001",
+  "mh_sale_point": "P001",
+  "sale_point": "P001",
+  "item_export_type": 1, // este si que no sé que es XD
+  "fiscal_recinct": "01", // viene en los seeds
+  "tax_regime": "EX-1.1000.000", // viene en los seeds
+
+  "client_name": "CACERES SOLUTIONS, SOCIEDAD POR ACCIONES SIMPLIFICADA",
+  "client_doc_type": "36",
+  "client_identity_code": "05280701251017",
+  "client_commercial_name": "CACERES SOLUTIONS, SOCIEDAD POR ACCIONES SIMPLIFICADA",
+  "client_country_code": "US", // buscar en catálogo 
+  "client_country_name": "United States",
+  "client_address_complement": "123 Main St, Miami",
+  "client_type": 2, // 1 es natural, 2 es juridico
+  "client_economic_activity_name": "Otros servicios de información n.c.p.",
+  "client_phone_number": "+13051234567",
+  "client_email": "john.doe@example.com",
+
+  "otrosDocumentos": [
+    {
+      "codDocAsociado": 4, // este 4 es de traslados
+      "descDocumento": "CONTRATO-001",
+      "detalleDocumento": "Contrato de servicios de software",
+      "modoTransp": 4, // 1 – Terrestre; 2 – Aereo; 3 – Maritimo; 4 – Ferreo; 5 – Multimodal; 6 - Correo
+      "placaTrans": "00230374748383838301",
+      "numConductor": "00230374748383838301",
+      "nombreConductor": "Gerardo Raúl Marquez Hernandez"
+    }
+  ],
+
+  "cuerpoDocumento": [
+    {
+      "numItem": 1,
+      "cantidad": 2,
+      "codigo": "SW-001", // interno
+      "uniMedida": 59,
+      "descripcion": "Licencia de software empresarial",
+      "precioUni": 500.00,
+      "montoDescu": 0.00,
+      "ventaGravada": 1000.00,
+      "tributos": ["C3"], // tipo de tributo (mandar siempre ese o consultar)
+      "noGravado": 0.00
+    }
+  ],
+
+  "totalGravada": 1000.00,
+  "descuento": 0.00,
+  "porcentajeDescuento": 0.00,
+  "totalDescu": 0.00,
+  "seguro": 0.00,
+  "flete": 0.00,
+  "montoTotalOperacion": 1000.00,
+  "totalNoGravado": 0.00,
+  "totalPagar": 1000.00,
+  "totalLetras": "MIL DÓLARES 00/100",
+  "condicionOperacion": 1,
+
+  "pagos": [
+    {
+      "codigo": "01", // de los seeds
+      "montoPago": 1000.00,
+      "referencia": "TRF-001", // numero referencia del banco por ejemplo
+      "plazo": null,
+      "periodo": null
+    }
+  ],
+
+  "codIncoterms": "01", // de los seeds
+  "descIncoterms": "EXW-En fabrica", // de los seeds
+  "numPagoElectronico": null,
+  "observaciones": null,
+
+    "apendice": [
+    {
+      "campo": "ORDEN",
+      "etiqueta": "ORDEn12334",
+      "valor": "ValorEtiqueta123"
+    }
+  ]
+}
+
+SUJETO EXCLUIDO:
+
+{
+  "sale_id": 12345,
+  "token": "Bearer eyJhb...",
+
+  "factu_version": 1,
+  "environment": "00",
+  "sale_type": "14",
+  "dte_formatted": "DTE-14-M001P001-000000000000001",
+  "generationCode": "ABC35E29-7A07-5AE4-9E1E-0BAA078BA45C",
+  "dateSale": "2025-09-22",
+  "hourSale": "14:30:00",
+
+  "org_nit": "06141608191032",
+  "org_nrc": "2836740",
+  "org_name": "SIGMA TRADE LOGISTICS, S.A. DE C.V.",
+  "economyActivity_num": "51201",
+  "economyActivity_name": "Transporte de carga por vía aérea",
+  "establishment_department_code": "06",
+  "establishment_municipallity_code": "14",
+  "establishment_address": "San Salvador, El Salvador",
+  "org_phone": "+50325635276",
+  "org_email": "contacto@miempresa.com",
+  "mh_establishment": "M001",
+  "establishment": "S001",
+  "mh_sale_point": "P001",
+  "sale_point": "SIGMA-P.1",
+
+  "client_doc_type": "36",
+  "client_identity_code": "05280701251017",
+  "client_name": "Juan Pérez",
+  "client_economic_activity_num": "63990",
+  "client_economic_activity_name": "Otros servicios de información n.c.p.",
+  "client_address_department": "02",
+  "client_address_municipallity": "02",
+  "client_address_complement": "Col. Centro",
+  "client_phone_number": "+50370802740",
+  "client_email": "juanperez@mail.com",
+
+  "totalCompra": 100.0,
+  "descuento": 0.0,
+  "totalDescu": 0.0,
+  "subTotal": 100.0,
+  "ivaRete1": 0.00,
+  "reteRenta": 0.00,
+  "totalPagar": 100.00,
+  "totalLetras": "CIEN DÓLARES",
+  "condicionOperacion": 1,
+
+  "pagos": [
+    {
+      "codigo": "01",
+      "montoPago": 100.00,
+      "referencia": "123",
+      "plazo": null,
+      "periodo": null
+    }
+  ],
+
+  "observaciones": "Venta de prueba",
+
+  "sale_details": [
+    {
+      "numItem": 1,
+      "item_type": 1,
+      "quantity": 2,
+      "internal_sale_code": "PROD001",
+      "measure_unit_code": 36,
+      "measure_unit_name": "Libra",
+      "unit_price": 50.00,
+      "discount_amount": 0.0,
+      "amount": 100.0
+    }
+  ],
+
+  "apendice": [
+    {
+      "campo": "campoExtra",
+      "etiqueta": "Etiqueta Extra",
+      "valor": "Valor Extra"
+    }
+  ]
+}
+
+
+ANULAR VENTA:
+
+{
+  "annulation_id": 1,
+  "sale_type": "01",
+  "token": "Bearer eyJhb...",
+
+  "factu_version": 2,
+  "environment": "00",
+  "generationCode": "15639BCB-913F-4875-7C1D-A7D8129AA25F",
+  "dateNullSale": "2025-09-10",
+  "hourNullSale": "11:30:00",
+
+  "org_nit": "06141608191032",
+  "org_name": "SIGMA TRADE LOGISTICS, S.A. DE C.V.",
+  "establishment_type": "01",
+  "org_phone": "+50325635276",
+  "org_email": "contacto@miempresa.com",
+  "mh_establishment": "M001",
+  "establishment": "S001",
+  "mh_sale_point": "P001",
+  "sale_point": "SIGMA-P.1",
+
+  "relatted_sale_type": "01",
+  "relatted_sale_generation_code": "05639BAB-941F-4835-7C1D-A7D8129AA26F",
+  "relatted_sale_reception_stamp": "202526A6811F0F5D4751934F4170F5C0F3F7QWOX",
+  "relatted_sale_dte_number": "DTE-01-M001P001-000000000000045",
+  "relatted_sale_date": "2025-09-10",
+  "relatted_sale_iva_amount": 0.57,
+  "relatted_sale_client_document_type": null,
+  "relatted_sale_client_document_number": null,
+  "relatted_sale_client_name": "Juan Pérez",
+  "relatted_sale_client_phone": "+50378965432",
+  "relatted_sale_client_email": "juan.perez@example.com",
+
+  "motivation_code": 2,
+  "motivation_description": "Error en la factura original",
+  "responsible_agent_name": "Carlos López",
+  "responsible_agent_document_type": "36",
+  "responsible_agent_document_number": "12345678-9",
+  "solicitor_name": "Ana Torres",
+  "solicitor_document_type": "36",
+  "solicitor_document_number": "98765432-1"
+}
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+** NOTAS EXTRA:
+
+Campos extraños:
+En Notas débido y crédito.
+
+operation_condition: number
+1 - al contado
+2 - al crédito
+3 - otro (cuando se mezcla)
+
+  "documentoRelacionado": 
+    {
+      "tipoDocumento": "03", // 3 = CCF
+      "tipoGeneracion": 2, // 1 fue hecho físico o 2 fue electrónico
+      "numeroDocumento": "05639BAB-948F-4835-7C1D-A7D8129AA25F", // codigo de generación
+      "fechaEmision": "2023-11-10" // fecha de doc. relacionado
+    }

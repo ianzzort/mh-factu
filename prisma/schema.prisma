@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model document_identity_types {
+  id         Int       @id(map: "document_identity_types_pk") @default(autoincrement())
+  created_at DateTime  @default(now()) @db.Date
+  mh_code    String?   @db.VarChar
+  name       String?   @db.VarChar
+  clients    clients[]
+}
+
+model economic_activities {
+  id         Int       @id(map: "economic_activities_pk") @default(autoincrement())
+  created_at DateTime  @default(now()) @db.Date
+  mh_code    String?   @db.VarChar
+  name       String?
+  clients    clients[]
+}
+
+model clients {
+  id                      Int                      @id(map: "clients_pk") @default(autoincrement())
+  created_at              DateTime                 @default(now()) @db.Date
+  department_id           Int?
+  document_identity_id    Int?
+  economic_activity_id    Int?
+  email                   String?                  @db.VarChar
+  identity_code           String?                  @db.VarChar
+  is_major_contributor    Boolean?
+  municipality_id         Int?
+  name                    String?                  @db.VarChar
+  phone_number            String?                  @db.VarChar
+  street_1                String?
+  street_2                String?
+  nrc                     String?                  @db.VarChar
+  departments             departments?             @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "clients_departments_fk")
+  document_identity_types document_identity_types? @relation(fields: [document_identity_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "clients_document_identity_types_fk")
+  economic_activities     economic_activities?     @relation(fields: [economic_activity_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "clients_economic_activities_fk")
+  municipalities          municipalities?          @relation(fields: [municipality_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "clients_municipalities_fk")
+  sales                   sales[]
+}
+
+model departments {
+  id             Int              @id(map: "departments_pk") @default(autoincrement())
+  created_at     DateTime         @default(now()) @db.Date
+  mh_code        String           @db.VarChar
+  name           String           @db.VarChar
+  clients        clients[]
+  establishment  establishment[]
+  municipalities municipalities[]
+}
+
+model establishment {
+  id                    Int                 @id(map: "establishment_pk") @default(autoincrement())
+  created_at            DateTime            @default(now()) @db.Date
+  department_id         Int?
+  establishment_type_id Int?
+  mh_code               String?             @db.VarChar
+  municipality_id       Int?
+  street_1              String?
+  street_2              String?
+  name                  String?             @db.VarChar
+  departments           departments?        @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "establishment_departments_fk")
+  establishment_type    establishment_type? @relation(fields: [establishment_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "establishment_establishment_type_fk")
+  municipalities        municipalities?     @relation(fields: [municipality_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "establishment_municipalities_fk")
+  sale_points           sale_points[]
+}
+
+model establishment_type {
+  id            Int             @id(map: "establishment_type_pk") @default(autoincrement())
+  created_at    DateTime        @default(now()) @db.Date
+  mh_code       String?         @db.VarChar
+  name          String?         @db.VarChar
+  credits       credits[]
+  establishment establishment[]
+}
+
+model municipalities {
+  id            Int             @id(map: "municipalities_pk") @default(autoincrement())
+  created_at    DateTime        @default(now()) @db.Date
+  mh_code       String          @db.VarChar
+  name          String          @db.VarChar
+  department_id Int?
+  clients       clients[]
+  establishment establishment[]
+  departments   departments?    @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "municipalities_departments_fk")
+}
+
+model measure_units {
+  id              Int               @id(map: "measure_units_pk") @default(autoincrement())
+  created_at      DateTime          @default(now()) @db.Date
+  mh_code         String?           @db.VarChar
+  name            String?           @db.VarChar
+  solutions_sales solutions_sales[]
+}
+
+model sale_points {
+  id               Int            @id(map: "sale_points_pk") @default(autoincrement())
+  created_at       DateTime       @default(now()) @db.Date
+  establishment_id Int?
+  mh_code          String?        @db.VarChar
+  name             String?        @db.VarChar
+  establishment    establishment? @relation(fields: [establishment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sale_points_establishment_fk")
+  sales            sales[]
+}
+
+model solutions_types {
+  id              Int               @id(map: "solutions_types_pk") @default(autoincrement())
+  created_at      DateTime          @default(now()) @db.Date
+  mh_code         String?           @db.VarChar
+  name            String?           @db.VarChar
+  solutions_sales solutions_sales[]
+}
+
+model solutions_sales {
+  id               Int              @id(map: "solutions_sales_pk") @default(autoincrement())
+  created_at       DateTime         @default(now()) @db.Date
+  internal_code    String?          @db.VarChar
+  description      String?          @db.VarChar
+  solution_type_id Int?
+  measure_unit_id  Int?
+  sale_details     sale_details[]
+  measure_units    measure_units?   @relation(fields: [measure_unit_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "solutions_sales_measure_units_fk")
+  solutions_types  solutions_types? @relation(fields: [solution_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "solutions_sales_solutions_types_fk")
+}
+
+model payment_methods {
+  id         Int      @id(map: "payment_methods_pk") @default(autoincrement())
+  created_at DateTime @default(now()) @db.Date
+  name       String?  @db.VarChar
+  mh_code    String?  @db.VarChar
+}
+
+model sale_details {
+  id               Int              @id(map: "sale_details_pk") @default(autoincrement())
+  created_at       DateTime         @default(now()) @db.Date
+  discount_amount  Float?           @db.Real
+  exento_amount    Float?           @db.Real
+  gravado_amount   Float?           @db.Real
+  iva_total        Float?           @db.Real
+  no_suj_amount    Float?           @db.Real
+  num_item         Int?
+  quantity         Float?           @db.Real
+  solution_sale_id Int?
+  unit_price       Float?           @db.Real
+  sale_id          Int?
+  sales            sales?           @relation(fields: [sale_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sale_details_sales_fk")
+  solutions_sales  solutions_sales? @relation(fields: [solution_sale_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sale_details_solutions_sales_fk")
+}
+
+model sale_types {
+  id         Int      @id(map: "sale_types_pk") @default(autoincrement())
+  created_at DateTime @default(now()) @db.Date
+  mh_code    String?  @db.VarChar
+  name       String?  @db.VarChar
+  sales      sales[]
+}
+
+model credits {
+  id                 Int                 @id(map: "credits_pk") @default(autoincrement())
+  created_at         DateTime            @default(now()) @db.Date
+  establishment_id   Int?
+  residue            Float?              @db.Real
+  sale_id            Int?
+  seattle            DateTime?           @db.Date
+  sold_out           Boolean?
+  establishment_type establishment_type? @relation(fields: [establishment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "credits_establishment_type_fk")
+  sales              sales?              @relation(fields: [sale_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "credits_sales_fk")
+}
+
+model payments {
+  id                Int      @id(map: "payments_pk") @default(autoincrement())
+  created_at        DateTime @default(now()) @db.Date
+  amount            Float?   @db.Real
+  credit_id         Int?
+  payment_method_id Int?
+  sale_id           Int?
+  sales             sales?   @relation(fields: [sale_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "payments_sales_fk")
+}
+
+model sales {
+  id                        Int            @id(map: "sales_pk") @default(autoincrement())
+  created_at                DateTime       @default(now()) @db.Timestamp(6)
+  client_id                 Int?
+  control_num_dte           String?        @unique(map: "dte_sales_unique") @db.VarChar
+  discount_total_percentage Float?         @db.Real
+  discount_total            Float?         @db.Real
+  generation_code           String?        @db.VarChar
+  iva_total                 Float?         @db.Real
+  operation_condition       Int?
+  reception_stamp           String?        @db.VarChar
+  sale_point_id             Int?
+  sale_type_id              Int?
+  total_amount              Float?         @db.Real
+  total_exento              Float?         @db.Real
+  total_gravado             Float?         @db.Real
+  total_letters             String?        @db.VarChar
+  total_no_suj              Float?         @db.Real
+  total_of_totals           Float?         @db.Real
+  total_with_discount       Float?         @db.Real
+  discount_exento           Float?         @db.Real
+  discount_no_suj           Float?         @db.Real
+  discount_gravado          Float?         @db.Real
+  user_id                   Int?
+  is_credit                 Boolean?
+  dte_type                  String?        @db.VarChar
+  dte_counter               Int?
+  iva_retention             Float?         @db.Real
+  tax_retention             Float?         @db.Real
+  fh_procesamiento          String?        @db.VarChar(100)
+  mh_json                   Json?          @db.Json
+  iva_perception            Float?         @db.Real
+  credits                   credits[]
+  payments                  payments[]
+  sale_details              sale_details[]
+  clients                   clients?       @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sales_clients_fk")
+  sale_points               sale_points?   @relation(fields: [sale_point_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sales_sale_points_fk")
+  sale_types                sale_types?    @relation(fields: [sale_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sales_sale_types_fk")
+  users                     users?         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sales_users_fk")
+}
+
+model users {
+  id         Int      @id(map: "users_pk_1") @default(autoincrement())
+  created_at DateTime @default(now()) @db.Date
+  name       String?  @db.VarChar
+  sales      sales[]
+}
+
+model organization_values {
+  id         Int      @id(map: "org_pk_1") @default(autoincrement())
+  created_at DateTime @default(now()) @db.Date
+  key        String   @db.VarChar
+  value      String?  @db.VarChar
+}
+
+model fiscal_recinct {
+  id         Int      @id(map: "solutions_types_pk_1") @default(autoincrement())
+  created_at DateTime @default(now()) @db.Date
+  mh_code    String?  @db.VarChar
+  name       String?  @db.VarChar
+}
+
+model regime {
+  id          Int      @id(map: "solutions_types_pk_1_1") @default(autoincrement())
+  created_at  DateTime @default(now()) @db.Date
+  mh_code     String?  @db.VarChar
+  description String?  @db.VarChar
+}
+
+model incoterms {
+  id          Int      @id(map: "incoterms_pk_1") @default(autoincrement())
+  created_at  DateTime @default(now()) @db.Date
+  mh_code     String?  @db.VarChar
+  description String?  @db.VarChar
+}
